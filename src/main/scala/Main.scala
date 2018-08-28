@@ -15,14 +15,8 @@ object Main extends App {
  override def main(arg: Array[String]): Unit = {
    var sparkConf = new SparkConf().setMaster("local").setAppName("Transaction")
    var sc = new SparkContext(sparkConf)
-       val spark = SparkSession
-      .builder()
-      .appName("test")
-      .master("local[2]")
-      .getOrCreate()
-      
-
-
+       val spark = SparkSession.builder().appName("test").master("local[2]").getOrCreate()
+  
    val resource = getClass.getResourceAsStream("/Transaction Sample data-1.csv")
     if (resource == null) sys.error("Please download the banking dataset 1")
      val firstRddRaw =  sc.parallelize(Source.fromInputStream(resource).getLines().toList)
@@ -141,11 +135,11 @@ object Main extends App {
 
  }
 
-  def transactionProcessor(transaction: Transaction):Double = {
-    if(transaction.nature == "C")  return transaction.amount
-    transaction.amount * -1
+  // def transactionProcessor(transaction: Transaction):Double = {
+  //   if(transaction.nature == "C")  return transaction.amount
+  //   transaction.amount * -1
 
-  }
+  // }
 
   def parse1(row: String): Transaction = {
    val fields = row.split(",")
@@ -155,7 +149,8 @@ object Main extends App {
    val timestamp: Date = java.sql.Date.valueOf( y+"-"+m+"-"+d)
    val year: Int = y.toInt
    val nature: String = fields(3) 
-   val amount: Double = fields(4).substring(1).toDouble
+   var amount: Double = fields(4).substring(1).toDouble
+   if (nature == "D"){amount = amount * -1}
    Transaction(accountId,name,timestamp,year,nature,amount)
    
  }
@@ -168,7 +163,8 @@ object Main extends App {
    val timestamp: Date = java.sql.Date.valueOf( y+"-"+m+"-"+d)
    val nature: String = fields(4) 
    val year: Int = y.toInt
-   val amount: Double = fields(5).substring(1).toDouble
+   var amount: Double = fields(5).substring(1).toDouble
+   if (nature == "D"){amount = amount * -1}
    Transaction(accountId,name,timestamp,year,nature,amount)
    
  }
